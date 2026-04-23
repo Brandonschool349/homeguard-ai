@@ -1,8 +1,4 @@
-type Message = {
-  role: "user" | "assistant";
-  content: string;
-  timestamp?: string;
-};
+import { Message } from "@/types";
 
 type Props = {
   message: Message;

@@ -1,13 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { Message } from "@/types";
 import MessageBubble from "./MessageBubble";
-
-type Message = {
-  role: "user" | "assistant";
-  content: string;
-  timestamp?: string;
-};
 
 type Props = {
   messages: Message[];
@@ -24,8 +19,6 @@ export default function ChatWindow({ messages, isLoading }: Props) {
   return (
     <div className="flex-1 overflow-y-auto p-6 space-y-4">
       <div className="max-w-3xl mx-auto space-y-4">
-        
-        {/* Mensaje inicial */}
         {messages.length === 0 && (
           <div className="bg-gray-800 rounded-2xl p-4 text-sm text-gray-300 rounded-bl-sm">
             <div className="flex items-center gap-2 mb-2">
@@ -38,12 +31,10 @@ export default function ChatWindow({ messages, isLoading }: Props) {
           </div>
         )}
 
-        {/* Mensajes */}
-        {messages.map((msg, i) => (
-          <MessageBubble key={i} message={msg} />
+        {messages.map((msg) => (
+          <MessageBubble key={msg.id} message={msg} />
         ))}
 
-        {/* Typing indicator */}
         {isLoading && (
           <div className="flex justify-start">
             <div className="bg-gray-800 rounded-2xl rounded-bl-sm px-4 py-3 flex gap-1 items-center">

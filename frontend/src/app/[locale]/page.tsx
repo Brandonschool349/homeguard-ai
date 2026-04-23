@@ -5,48 +5,28 @@ import Sidebar from "@/components/Sidebar";
 import StatusBar from "@/components/ui/StatusBar";
 import ChatWindow from "@/components/chat/ChatWindow";
 import ChatInput from "@/components/chat/ChatInput";
-
-type Message = {
-  role: "user" | "assistant";
-  content: string;
-  timestamp?: string;
-};
+import { useChat } from "@/hooks/useChat";
 
 export default function Home() {
   const [currentView, setCurrentView] = useState("chat");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSend = async (content: string) => {
-    const timestamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    
-    const userMessage: Message = { role: "user", content, timestamp };
-    setMessages((prev) => [...prev, userMessage]);
-    setIsLoading(true);
-
-    // Por ahora respuesta simulada - luego conectamos a FastAPI
-    setTimeout(() => {
-      const response: Message = {
-        role: "assistant",
-        content: "I am processing your request. FastAPI connection coming soon.",
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      };
-      setMessages((prev) => [...prev, response]);
-      setIsLoading(false);
-    }, 1500);
-  };
+  const { messages, isLoading, error, send, clear } = useChat("local");
 
   return (
     <main className="min-h-screen bg-gray-950 text-white flex">
       <Sidebar currentView={currentView} onViewChange={setCurrentView} />
-      
+
       <div className="flex-1 flex flex-col overflow-hidden">
         <StatusBar isLocalLLM={true} currentView={currentView} />
-        
+
         {currentView === "chat" && (
           <>
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-2 mx-6 mt-4 rounded-lg">
+                ⚠️ {error}
+              </div>
+            )}
             <ChatWindow messages={messages} isLoading={isLoading} />
-            <ChatInput onSend={handleSend} isLoading={isLoading} />
+            <ChatInput onSend={send} isLoading={isLoading} />
           </>
         )}
 
