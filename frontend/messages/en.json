@@ -1,0 +1,14 @@
+{
+  "app": {
+    "title": "HomeGuard AI",
+    "subtitle": "Your intelligent home security system"
+  },
+  "chat": {
+    "placeholder": "Ask your security agent...",
+    "send": "Send"
+  },
+  "alerts": {
+    "title": "Recent Alerts",
+    "noAlerts": "No alerts detected"
+  }
+}
