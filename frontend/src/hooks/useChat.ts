@@ -31,6 +31,21 @@ export function useChat(provider: LLMProvider = "local") {
 
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
+    // Detectar saludos simples
+    const greetings = ["hola", "hi", "hello", "hey", "buenos días", "buenas", "good morning"];
+    const isGreeting = greetings.some(g => content.toLowerCase().trim() === g);
+
+    if (isGreeting) {
+    const greetingResponse: Message = {
+        id: generateId(),
+        role: "assistant",
+        content: "Hello! I'm HomeGuard AI, your security assistant. How can I help you today?",
+        timestamp: getTimestamp(),
+    };
+    setMessages((prev) => [...prev, greetingResponse]);
+    setIsLoading(false);
+    return;
+    }
 
     try {
       const updatedMessages = [...messages, userMessage];
