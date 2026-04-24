@@ -2,7 +2,8 @@ import { Message, LLMProvider } from "@/types";
 
 export async function sendMessage(
   messages: Message[],
-  provider: LLMProvider = "local"
+  provider: LLMProvider = "local",
+  customPrompt?: string
 ): Promise<string> {
   const res = await fetch("http://localhost:8000/chat/completions", {
     method: "POST",
@@ -13,7 +14,8 @@ export async function sendMessage(
       provider,
       messages,
       max_tokens: 500,
-      temperature: 0.7
+      temperature: 0.7,
+      custom_prompt: customPrompt ?? "",
     }),
   });
 

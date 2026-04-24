@@ -11,3 +11,4 @@ class ChatRequest(BaseModel):
     max_tokens: Optional[int] = 500
     temperature: Optional[float] = 0.7
     provider: Literal["local", "groq"] = "local"
+    custom_prompt: Optional[str] = ""

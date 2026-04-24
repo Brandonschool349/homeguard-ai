@@ -20,20 +20,18 @@ eot_ids = [tokenizer.eos_token_id, eot_id]
 
 print("Modelo local listo!")
 
-SYSTEM_PROMPT = """
-You are HomeGuard AI, an intelligent home security assistant.
-Follow these rules strictly:
-- Answer ONLY what the user asks, nothing more
-- Be concise and accurate in your responses
-- Be conversational and natural, like ChatGPT
-- Use markdown formatting when helpful
-- Respond in the same language the user uses
-- If asked about security events, analyze them carefully
-- You have access to cameras and motion sensors in the home
-"""
+BASE_PROMPT = """You are HomeGuard AI, an intelligent home security assistant.
+You monitor cameras, detect faces, and help manage security rules.
+Answer ONLY what the user asks. Be concise and professional.
+Respond in the same language the user uses."""
+
+def build_system_prompt(custom_prompt: str = "") -> str:
+    if custom_prompt.strip():
+        return f"{BASE_PROMPT}\n\nAdditional instructions: {custom_prompt}"
+    return BASE_PROMPT
 
 def generate_local_response(req):
-    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    messages = [{"role": "system", "content": build_system_prompt(req.custom_prompt)}]
 
     for msg in req.messages:
         messages.append({

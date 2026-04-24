@@ -12,6 +12,7 @@ const navItems = [
   { id: "camera",    icon: "📷", label: "Camera"    },
   { id: "alerts",    icon: "🚨", label: "Alerts"    },
   { id: "documents", icon: "📄", label: "Documents" },
+  { id: "settings",  icon: "⚙️", label: "Settings"  },
 ];
 
 export default function Sidebar({ currentView, onViewChange }: Props) {
