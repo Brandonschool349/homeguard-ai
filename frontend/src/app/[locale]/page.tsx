@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { LLMProvider } from "@/types";
+import { useSettingsStore } from "@/hooks/useSettingsStore";
 import Sidebar from "@/components/Sidebar";
 import StatusBar from "@/components/ui/StatusBar";
 import ProviderSelector from "@/components/ui/ProviderSelector";
@@ -10,24 +10,22 @@ import SettingsView from "@/components/settings/SettingsView";
 
 export default function Home() {
   const [currentView, setCurrentView] = useState("chat");
-  const [provider, setProvider] = useState<LLMProvider>("groq");
+  const { primaryProvider, setPrimaryProvider } = useSettingsStore();
 
   return (
     <main className="min-h-screen bg-gray-950 text-white flex">
       <Sidebar currentView={currentView} onViewChange={setCurrentView} />
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <StatusBar isLocalLLM={provider === "local"} currentView={currentView} />
-        
+        <StatusBar isLocalLLM={primaryProvider === "local"} currentView={currentView} />
+
         {currentView === "chat" && (
-          <ProviderSelector provider={provider} onProviderChange={setProvider} />
+          <ProviderSelector provider={primaryProvider} onProviderChange={setPrimaryProvider} />
         )}
 
-        {currentView === "chat" && <ChatView provider={provider} />}
+        {currentView === "chat" && <ChatView />}
 
-        {currentView === "settings" && (
-          <SettingsView provider={provider} onProviderChange={setProvider} />
-        )}
+        {currentView === "settings" && <SettingsView />}
 
         {currentView !== "chat" && currentView !== "settings" && (
           <div className="flex-1 flex items-center justify-center text-gray-600">

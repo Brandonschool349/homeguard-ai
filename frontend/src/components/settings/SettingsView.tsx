@@ -2,18 +2,14 @@
 
 import { useState } from "react";
 import { LLMProvider } from "@/types";
+import { useSettingsStore } from "@/hooks/useSettingsStore";
 import AgentPermissions from "./AgentPermissions";
 import LanguageSelector from "./LanguageSelector";
 import StorageSettings from "./StorageSettings";
 
-type Props = {
-  provider: LLMProvider;
-  onProviderChange: (p: LLMProvider) => void;
-};
-
-export default function SettingsView({ provider, onProviderChange }: Props) {
+export default function SettingsView() {
+  const { primaryProvider, setPrimaryProvider, fallbackEnabled, setFallbackEnabled } = useSettingsStore();
   const [systemPrompt, setSystemPrompt] = useState("");
-  const [fallbackEnabled, setFallbackEnabled] = useState(true);
   const [groqKey, setGroqKey] = useState("");
   const [saved, setSaved] = useState(false);
 
@@ -39,17 +35,17 @@ export default function SettingsView({ provider, onProviderChange }: Props) {
             {(["groq", "local"] as LLMProvider[]).map((p) => (
               <button
                 key={p}
-                onClick={() => onProviderChange(p)}
+                onClick={() => setPrimaryProvider(p)}
                 className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all ${
-                  provider === p
+                  primaryProvider === p
                     ? "border-green-500/50 bg-green-500/10"
                     : "border-gray-700 hover:border-gray-600"
                 }`}
               >
                 <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                  provider === p ? "border-green-400" : "border-gray-600"
+                  primaryProvider === p ? "border-green-400" : "border-gray-600"
                 }`}>
-                  {provider === p && <div className="w-2 h-2 rounded-full bg-green-400" />}
+                  {primaryProvider === p && <div className="w-2 h-2 rounded-full bg-green-400" />}
                 </div>
                 <div className="text-left">
                   <p className="text-sm font-medium text-white">
@@ -96,14 +92,9 @@ export default function SettingsView({ provider, onProviderChange }: Props) {
           />
         </section>
 
-        {/* Agent Permissions */}
         <AgentPermissions />
-
-        {/* Language */}
         <LanguageSelector />
-
-        {/* Storage */}
-        <StorageSettings provider={provider} />
+        <StorageSettings provider={primaryProvider} />
 
         {/* API Keys */}
         <section className="bg-gray-900 rounded-2xl p-6 space-y-4">
@@ -121,13 +112,10 @@ export default function SettingsView({ provider, onProviderChange }: Props) {
           </div>
         </section>
 
-        {/* Save */}
         <button
           onClick={handleSave}
           className={`w-full py-3 rounded-xl font-semibold text-sm transition-all ${
-            saved
-              ? "bg-green-500 text-black"
-              : "bg-white text-black hover:bg-gray-200"
+            saved ? "bg-green-500 text-black" : "bg-white text-black hover:bg-gray-200"
           }`}
         >
           {saved ? "✓ Saved!" : "Save Changes"}
