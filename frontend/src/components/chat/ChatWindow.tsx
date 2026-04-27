@@ -17,7 +17,7 @@ export default function ChatWindow({ messages, isLoading }: Props) {
   }, [messages, isLoading]);
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 space-y-4">
+    <div className="flex-1 overflow-y-auto p-6 min-h-0">
       <div className="max-w-3xl mx-auto space-y-4">
         {messages.length === 0 && (
           <div className="bg-gray-800 rounded-2xl p-4 text-sm text-gray-300 rounded-bl-sm">

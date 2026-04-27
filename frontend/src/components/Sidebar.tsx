@@ -1,10 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { Conversation } from "@/types";
+import ConversationList from "./chat/ConversationList";
 
 type Props = {
   currentView: string;
   onViewChange: (view: string) => void;
+  onConversationSelect: (id: string) => void;
+  onNewConversation: () => void;
+  onDeleteConversation: (id: string) => void;
+  activeConversationId: string | null;
+  conversations: Conversation[];
 };
 
 const navItems = [
@@ -15,12 +22,20 @@ const navItems = [
   { id: "settings",  icon: "⚙️", label: "Settings"  },
 ];
 
-export default function Sidebar({ currentView, onViewChange }: Props) {
+export default function Sidebar({
+  currentView,
+  onViewChange,
+  onConversationSelect,
+  onNewConversation,
+  onDeleteConversation,
+  activeConversationId,
+  conversations,
+}: Props) {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
     <aside className={`bg-gray-900 border-r border-gray-800 flex flex-col transition-all duration-300 ${collapsed ? "w-16" : "w-64"}`}>
-      
+
       {/* Header */}
       <div className="p-4 flex items-center justify-between border-b border-gray-800">
         {!collapsed && (
@@ -40,7 +55,7 @@ export default function Sidebar({ currentView, onViewChange }: Props) {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 p-3 space-y-1">
+      <nav className="p-3 space-y-1 border-b border-gray-800">
         {navItems.map((item) => (
           <button
             key={item.id}
@@ -57,6 +72,19 @@ export default function Sidebar({ currentView, onViewChange }: Props) {
         ))}
       </nav>
 
+      {/* Conversation list */}
+      {!collapsed && currentView === "chat" && (
+        <div className="flex-1 overflow-hidden">
+          <ConversationList
+            conversations={conversations}
+            activeId={activeConversationId}
+            onSelect={onConversationSelect}
+            onDelete={onDeleteConversation}
+            onNew={onNewConversation}
+          />
+        </div>
+      )}
+
       {/* Footer */}
       {!collapsed && (
         <div className="p-4 border-t border-gray-800">
@@ -71,7 +99,6 @@ export default function Sidebar({ currentView, onViewChange }: Props) {
           </div>
         </div>
       )}
-
     </aside>
   );
 }

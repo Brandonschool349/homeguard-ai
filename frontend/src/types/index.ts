@@ -6,18 +6,20 @@ export type Message = {
   role: MessageRole;
   content: string;
   timestamp: string;
+  provider?: string;
 };
 
 export type Conversation = {
   id: string;
   title: string;
+  provider: string;
   messages: Message[];
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 };
 
 // ===== LLM =====
-export type LLMProvider = "local" | "groq";
+export type LLMProvider = "groq" | "local" | "custom";
 
 export type LLMConfig = {
   provider: LLMProvider;

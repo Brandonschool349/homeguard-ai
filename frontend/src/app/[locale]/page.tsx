@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSettingsStore } from "@/hooks/useSettingsStore";
+import { useConversations } from "@/hooks/useConversations";
 import Sidebar from "@/components/Sidebar";
 import StatusBar from "@/components/ui/StatusBar";
 import ProviderSelector from "@/components/ui/ProviderSelector";
@@ -11,10 +12,24 @@ import SettingsView from "@/components/settings/SettingsView";
 export default function Home() {
   const [currentView, setCurrentView] = useState("chat");
   const { primaryProvider, setPrimaryProvider } = useSettingsStore();
+  const { conversations, activeId, setActiveId, create, remove } = useConversations(primaryProvider);
+
+  const handleNewConversation = async () => {
+    await create();
+    setCurrentView("chat");
+  };
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white flex">
-      <Sidebar currentView={currentView} onViewChange={setCurrentView} />
+    <main className="h-screen bg-gray-950 text-white flex overflow-hidden">
+      <Sidebar
+        currentView={currentView}
+        onViewChange={setCurrentView}
+        onConversationSelect={setActiveId}
+        onNewConversation={handleNewConversation}
+        onDeleteConversation={remove}
+        activeConversationId={activeId}
+        conversations={conversations}
+      />
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <StatusBar isLocalLLM={primaryProvider === "local"} currentView={currentView} />
@@ -23,7 +38,9 @@ export default function Home() {
           <ProviderSelector provider={primaryProvider} onProviderChange={setPrimaryProvider} />
         )}
 
-        {currentView === "chat" && <ChatView />}
+        {currentView === "chat" && (
+          <ChatView key={activeId ?? "empty"} conversationId={activeId} />
+        )}
 
         {currentView === "settings" && <SettingsView />}
 

@@ -26,9 +26,19 @@ export default function MessageBubble({ message }: Props) {
         )}
         <p>{message.content}</p>
         {message.timestamp && (
-          <p className={`text-xs mt-1 ${isUser ? "text-blue-300" : "text-gray-500"}`}>
-            {message.timestamp}
-          </p>
+          <div className={`text-xs mt-1 flex items-center gap-1 ${isUser ? "text-blue-300" : "text-gray-500"}`}>
+            <span>{message.timestamp}</span>
+
+            {message.provider && !isUser && (
+              <span className="opacity-70">
+                · {message.provider === "local"
+                  ? "Local (fallback)"
+                  : message.provider === "groq"
+                  ? "Groq"
+                  : "Custom"}
+              </span>
+            )}
+          </div>
         )}
       </div>
     </div>

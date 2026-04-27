@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LLMProvider } from "@/types";
 import { useSettingsStore } from "@/hooks/useSettingsStore";
 import AgentPermissions from "./AgentPermissions";
@@ -8,14 +8,36 @@ import LanguageSelector from "./LanguageSelector";
 import StorageSettings from "./StorageSettings";
 
 export default function SettingsView() {
-  const { primaryProvider, setPrimaryProvider, fallbackEnabled, setFallbackEnabled } = useSettingsStore();
-  const [systemPrompt, setSystemPrompt] = useState("");
-  const [groqKey, setGroqKey] = useState("");
-  const [saved, setSaved] = useState(false);
+  const {
+    primaryProvider, setPrimaryProvider,
+    fallbackEnabled, setFallbackEnabled,
+    systemPrompt, setSystemPrompt,
+    customApiUrl, setCustomApiUrl,
+    customApiKey, setCustomApiKey,
+    customModel, setCustomModel,
+    loadSettings, persistSettings,
+  } = useSettingsStore();
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError("");
+    try {
+      await persistSettings();
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch {
+      setError("Failed to save settings. Is the backend running?");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -30,9 +52,8 @@ export default function SettingsView() {
         {/* AI Provider */}
         <section className="bg-gray-900 rounded-2xl p-6 space-y-4">
           <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">AI Provider</h3>
-
           <div className="space-y-3">
-            {(["groq", "local"] as LLMProvider[]).map((p) => (
+            {(["groq", "local", "custom"] as LLMProvider[]).map((p) => (
               <button
                 key={p}
                 onClick={() => setPrimaryProvider(p)}
@@ -49,12 +70,18 @@ export default function SettingsView() {
                 </div>
                 <div className="text-left">
                   <p className="text-sm font-medium text-white">
-                    {p === "groq" ? "⚡ Groq API" : "🖥️ Local LLM"}
+                    {p === "groq"
+                      ? "⚡ Groq API"
+                      : p === "local"
+                      ? "🖥️ Local LLM"
+                      : "🔧 Custom API"}
                   </p>
                   <p className="text-xs text-gray-500">
                     {p === "groq"
                       ? "Fast cloud inference — llama-3.3-70b"
-                      : "Private local inference — llama-3.2-3b"}
+                      : p === "local"
+                      ? "Private local inference — llama-3.2-3b"
+                      : "Use any OpenAI-compatible API"}
                   </p>
                 </div>
               </button>
@@ -96,29 +123,61 @@ export default function SettingsView() {
         <LanguageSelector />
         <StorageSettings provider={primaryProvider} />
 
-        {/* API Keys */}
+        {primaryProvider === "custom" && (
         <section className="bg-gray-900 rounded-2xl p-6 space-y-4">
-          <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">API Keys</h3>
-          <p className="text-xs text-gray-500">Add your own API keys for third party providers</p>
+          <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">
+            Custom Provider
+          </h3>
+
           <div>
-            <label className="text-xs text-gray-400 mb-1 block">Groq API Key</label>
+            <label className="text-xs text-gray-400 mb-1 block">API URL</label>
+            <input
+              value={customApiUrl}
+              onChange={(e) => setCustomApiUrl(e.target.value)}
+              placeholder="https://api.openai.com/v1/chat/completions"
+              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs text-gray-400 mb-1 block">API Key</label>
             <input
               type="password"
-              value={groqKey}
-              onChange={(e) => setGroqKey(e.target.value)}
-              placeholder="gsk_..."
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-400 transition-colors"
+              value={customApiKey}
+              onChange={(e) => setCustomApiKey(e.target.value)}
+              placeholder="sk-..."
+              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs text-gray-400 mb-1 block">Model</label>
+            <input
+              value={customModel}
+              onChange={(e) => setCustomModel(e.target.value)}
+              placeholder="gpt-4o-mini"
+              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white"
             />
           </div>
         </section>
+      )}
+
+        {error && (
+          <p className="text-sm text-red-400 text-center">{error}</p>
+        )}
 
         <button
           onClick={handleSave}
+          disabled={saving}
           className={`w-full py-3 rounded-xl font-semibold text-sm transition-all ${
-            saved ? "bg-green-500 text-black" : "bg-white text-black hover:bg-gray-200"
+            saved
+              ? "bg-green-500 text-black"
+              : saving
+              ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+              : "bg-white text-black hover:bg-gray-200"
           }`}
         >
-          {saved ? "✓ Saved!" : "Save Changes"}
+          {saved ? "✓ Saved!" : saving ? "Saving..." : "Save Changes"}
         </button>
 
       </div>
