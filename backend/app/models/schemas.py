@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import List, Optional, Literal
-from datetime import datetime
+from pydantic import BaseModel, EmailStr, Field
 
 class Mensaje(BaseModel):
     role: str
@@ -20,6 +20,8 @@ class MessageDoc(BaseModel):
     role: str
     content: str
     timestamp: str
+    provider: Optional[str] = None
+    fallback: bool = False
 
 class ConversationDoc(BaseModel):
     id: str
@@ -47,3 +49,15 @@ class SettingsDoc(BaseModel):
     "alerts": True,
     "night_mode": False,
 }
+    
+class AuthResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    
+class RegisterRequest(BaseModel):
+    email: EmailStr
+    password: str = Field(..., min_length=8, max_length=72)
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str = Field(..., min_length=8, max_length=72)

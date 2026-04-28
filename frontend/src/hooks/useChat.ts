@@ -13,12 +13,12 @@ function getTimestamp(): string {
   return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-export function useChat(provider: LLMProvider = "local", conversationId?: string | null) {
+export function useChat(conversationId?: string | null) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { systemPrompt } = useSettingsStore();
+  const { systemPrompt, primaryProvider } = useSettingsStore();
 
   // Cargar mensajes cuando cambia la conversación
   useEffect(() => {
@@ -77,7 +77,7 @@ export function useChat(provider: LLMProvider = "local", conversationId?: string
       const updatedMessages = [...messages, userMessage];
       const response = await sendMessage(
         updatedMessages,
-        provider,
+        primaryProvider,
         conversationId ?? undefined,
         systemPrompt
       );
@@ -88,6 +88,7 @@ export function useChat(provider: LLMProvider = "local", conversationId?: string
         content: response.choices[0].message.content,
         timestamp: getTimestamp(),
         provider: response.provider_used, // 👈 AQUÍ
+        fallback: response.fallback,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -96,7 +97,7 @@ export function useChat(provider: LLMProvider = "local", conversationId?: string
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isLoading, provider, conversationId, systemPrompt]);
+  }, [messages, isLoading, primaryProvider, conversationId, systemPrompt]);
 
   const clear = useCallback(() => {
     setMessages([]);

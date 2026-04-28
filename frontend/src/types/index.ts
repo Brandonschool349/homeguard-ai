@@ -7,6 +7,7 @@ export type Message = {
   content: string;
   timestamp: string;
   provider?: string;
+  fallback?: boolean;
 };
 
 export type Conversation = {
@@ -28,6 +29,19 @@ export type LLMConfig = {
   maxTokens: number;
 };
 
+export type ChatResponse = {
+  choices: {
+    index: number;
+    message: {
+      role: "assistant";
+      content: string;
+    };
+    finish_reason: string;
+  }[];
+  provider_used: LLMProvider;
+  fallback: boolean;
+};
+
 // ===== ALERTS =====
 export type AlertType = "motion" | "face_detected" | "unknown_face" | "intrusion";
 
@@ -46,3 +60,4 @@ export type User = {
   email: string;
   role: "admin" | "viewer";
 };
+

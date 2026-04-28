@@ -32,10 +32,12 @@ export default function MessageBubble({ message }: Props) {
             {message.provider && !isUser && (
               <span className="opacity-70">
                 · {message.provider === "local"
-                  ? "Local (fallback)"
+                  ? "Local"
                   : message.provider === "groq"
                   ? "Groq"
                   : "Custom"}
+
+                {message.fallback && " (fallback)"}
               </span>
             )}
           </div>

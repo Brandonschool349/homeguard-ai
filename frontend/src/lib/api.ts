@@ -1,4 +1,4 @@
-import { Message, LLMProvider } from "@/types";
+import { Message, LLMProvider, ChatResponse } from "@/types";
 
 const BACKEND = process.env.NEXT_PUBLIC_LOCAL_API_URL ?? "http://localhost:8000";
 
@@ -8,7 +8,7 @@ export async function sendMessage(
   provider: LLMProvider = "local",
   conversationId?: string,
   customPrompt?: string
-): Promise<any> {
+): Promise<ChatResponse> {
   const res = await fetch(`${BACKEND}/chat/completions`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

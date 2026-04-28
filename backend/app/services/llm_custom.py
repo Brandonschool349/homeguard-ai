@@ -1,6 +1,7 @@
 import time
 import httpx
 from app.core.database import settings_col
+from urllib.parse import urlparse
 
 BASE_PROMPT = """You are HomeGuard AI, an intelligent home security assistant.
 You monitor cameras, detect faces, and help manage security rules.
@@ -24,6 +25,10 @@ async def generate_custom_response(req):
 
     if not api_url or not model:
         raise Exception("Custom API URL or model not configured")
+    parsed = urlparse(api_url)
+
+    if parsed.scheme != "https" or not parsed.netloc:
+        raise Exception("Custom API URL must use HTTPS")
 
     messages = [{"role": "system", "content": build_system_prompt(req.custom_prompt)}]
 

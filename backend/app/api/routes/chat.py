@@ -26,6 +26,8 @@ async def chat(req: ChatRequest):
                 "role": "assistant",
                 "content": response_content,
                 "timestamp": now,
+                "provider": result.get("provider_used"),
+                "fallback": result.get("fallback", False),
             }
             title = req.messages[-1].content[:40] + "..." if len(req.messages[-1].content) > 40 else req.messages[-1].content
             await conversations.update_one(
