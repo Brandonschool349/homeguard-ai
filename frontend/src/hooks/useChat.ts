@@ -29,7 +29,9 @@ export function useChat(conversationId?: string | null) {
 
     const loadMessages = async () => {
       try {
-        const conv = await getConversation(conversationId);
+        const conv = await getConversation(conversationId) as {
+  messages?: Message[];
+};
         if (conv && conv.messages) {
           setMessages(conv.messages);
         } else {

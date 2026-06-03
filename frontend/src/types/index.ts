@@ -61,3 +61,12 @@ export type User = {
   role: "admin" | "viewer";
 };
 
+export type Settings = {
+  primary_provider: LLMProvider;
+  fallback_enabled: boolean;
+  system_prompt: string;
+  custom_api_url: string;
+  custom_api_key: string;
+  custom_model: string;
+  permissions: Record<string, boolean>;
+};

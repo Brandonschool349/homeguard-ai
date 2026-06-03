@@ -49,10 +49,17 @@ class SettingsDoc(BaseModel):
     "alerts": True,
     "night_mode": False,
 }
-    
+
+class User(BaseModel):
+    """User model consistent with frontend"""
+    id: str
+    email: str
+    role: Literal["admin", "viewer"] = "admin"
+
 class AuthResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+    user: Optional[User] = None
     
 class RegisterRequest(BaseModel):
     email: EmailStr

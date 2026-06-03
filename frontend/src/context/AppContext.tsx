@@ -1,7 +1,9 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { LLMProvider, User, Alert } from "@/types";
+import * as authLib from "@/lib/auth";
 
 type AppContextType = {
   // LLM
@@ -13,6 +15,7 @@ type AppContextType = {
   // Auth
   user: User | null;
   setUser: (u: User | null) => void;
+  isLoading: boolean;
 
   // Alerts
   alerts: Alert[];
@@ -27,6 +30,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [isLocalOnline, setIsLocalOnline] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Restaurar sesión al montar
+  useEffect(() => {
+    const restoreSession = () => {
+      setIsLoading(true);
+      try {
+        const token = authLib.getToken();
+        if (token) {
+           // Sólo sabemos que existe token
+         // El usuario real se restaurará después
+        } else {
+          // Sin token, limpiar usuario
+          setUser(null);
+          
+          // Redirigir a login si está en ruta protegida
+          const isAuthPage = pathname?.includes("/login") || pathname?.includes("/register");
+          if (!isAuthPage && pathname !== "/") {
+            router.push("/login");
+          }
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    restoreSession();
+  }, [router, pathname]);
 
   const addAlert = useCallback((alert: Alert) => {
     setAlerts((prev) => [alert, ...prev]);
@@ -43,6 +76,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       provider, setProvider,
       isLocalOnline, setIsLocalOnline,
       user, setUser,
+      isLoading,
       alerts, addAlert, resolveAlert,
     }}>
       {children}

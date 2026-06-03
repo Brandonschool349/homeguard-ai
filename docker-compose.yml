@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: homeguard-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: homeguard
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - homeguard
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: homeguard-backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      MONGO_URL: mongodb://mongodb:27017
+      MONGO_DB_NAME: homeguard
+      SECRET_KEY: ${SECRET_KEY:-your-secret-key-change-in-production}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      LOCAL_MODEL_ID: meta-llama/Llama-2-7b-chat-hf
+      CORS_ORIGINS: '["http://localhost:3000", "http://frontend:3000"]'
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - homeguard
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: homeguard-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_LOCAL_API_URL: http://localhost:8000
+    depends_on:
+      - backend
+    networks:
+      - homeguard
+
+volumes:
+  mongodb_data:
+  mongodb_config:
+
+networks:
+  homeguard:
+    driver: bridge

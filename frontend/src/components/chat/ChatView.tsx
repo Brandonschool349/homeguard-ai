@@ -12,7 +12,7 @@ type Props = {
 
 export default function ChatView({ conversationId }: Props) {
   const { primaryProvider } = useSettingsStore();
-  const { messages, isLoading, error, send } = useChat(primaryProvider, conversationId);
+  const { messages, isLoading, error, send } = useChat(conversationId);
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden min-h-0">

@@ -1,14 +1,15 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, status, Depends
 from app.models.schemas import ChatRequest
 from app.services.llm_router import route_request
 from app.core.database import conversations
+from app.core.dependencies import get_current_user
 from datetime import datetime
 import uuid
 
-router = APIRouter()
+router = APIRouter(prefix="/chat", tags=["chat"])
 
-@router.post("/chat/completions")
-async def chat(req: ChatRequest):
+@router.post("/completions")
+async def chat(req: ChatRequest, current_user = Depends(get_current_user)):
     try:
         result = await route_request(req)
         response_content = result["choices"][0]["message"]["content"]
@@ -40,4 +41,7 @@ async def chat(req: ChatRequest):
 
         return result
     except Exception as e:
-        return {"error": str(e)}
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )

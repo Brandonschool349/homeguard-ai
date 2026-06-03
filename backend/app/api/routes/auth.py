@@ -1,34 +1,65 @@
-from fastapi import APIRouter
-from app.models.schemas import RegisterRequest, LoginRequest
-from app.core.security import hash_password, verify_password
+from fastapi import APIRouter, HTTPException, status
+from app.models.schemas import RegisterRequest, LoginRequest, AuthResponse, User
 from app.core.database import users
+from app.core.security import hash_password, verify_password, create_access_token
 
-router = APIRouter()
+router = APIRouter(prefix="/auth", tags=["auth"])
 
-@router.post("/auth/register")
+@router.post("/register", response_model=dict)
 async def register(req: RegisterRequest):
     existing = await users.find_one({"email": req.email})
 
     if existing:
-        return {"error": "User already exists"}
+        raise HTTPException(
+            status_code=400,
+            detail="Registration failed"
+        )
 
-    user = {
+    user_doc = {
         "email": req.email,
-        "password": hash_password(req.password),
+        "hashed_password": hash_password(req.password),
+        "role": "viewer"
     }
 
-    await users.insert_one(user)
+    result = await users.insert_one(user_doc)
 
-    return {"message": "User created successfully"}
+    return {
+        "message": "User registered successfully",
+        "id": str(result.inserted_id)
+    }
 
-@router.post("/auth/login")
+from app.models.schemas import User
+
+@router.post("/login", response_model=AuthResponse)
 async def login(req: LoginRequest):
-    user = await users.find_one({"email": req.email})
+    user_doc = await users.find_one({"email": req.email})
 
-    if not user:
-        return {"error": "Invalid credentials"}
+    if not user_doc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
+        )
 
-    if not verify_password(req.password, user["password"]):
-        return {"error": "Invalid credentials"}
+    if not verify_password(
+        req.password,
+        user_doc.get("hashed_password", "")
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
+        )
 
-    return {"message": "Login successful"}
+    token = create_access_token({
+        "sub": user_doc["email"],
+        "role": user_doc.get("role", "viewer")
+    })
+
+    return AuthResponse(
+        access_token=token,
+        token_type="bearer",
+        user=User(
+            id=str(user_doc["_id"]),
+            email=user_doc["email"],
+            role=user_doc.get("role", "viewer")
+        )
+    )
