@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from app.models.schemas import RegisterRequest, LoginRequest, AuthResponse, User
 from app.core.database import users
 from app.core.security import hash_password, verify_password, create_access_token
+from app.core.dependencies import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -62,4 +63,12 @@ async def login(req: LoginRequest):
             email=user_doc["email"],
             role=user_doc.get("role", "viewer")
         )
+    )
+    
+@router.get("/me", response_model=User)
+async def get_me(current_user=Depends(get_current_user)):
+    return User(
+        id=str(current_user["_id"]),
+        email=current_user["email"],
+        role=current_user.get("role", "viewer")
     )

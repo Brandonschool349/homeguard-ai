@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { AppProvider } from "@/context/AppContext";
+import { ConversationProvider } from "@/context/ConversationContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -35,7 +36,9 @@ export default async function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <NextIntlClientProvider messages={messages}>
           <AppProvider>
-            {children}
+            <ConversationProvider>
+              {children}
+            </ConversationProvider>
           </AppProvider>
         </NextIntlClientProvider>
       </body>

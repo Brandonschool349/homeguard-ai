@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { LLMProvider } from "@/types";
+import { clearAllConversations } from "@/lib/api";
 
 type Props = {
   provider: LLMProvider;
@@ -18,9 +19,20 @@ export default function StorageSettings({ provider }: Props) {
   const [localLimit, setLocalLimit] = useState(500);
   const [cleared, setCleared] = useState(false);
 
-  const handleClear = () => {
-    setCleared(true);
-    setTimeout(() => setCleared(false), 2000);
+  const handleClear = async () => {
+    try {
+      await clearAllConversations();
+
+      setCleared(true);
+
+      setTimeout(() => {
+        setCleared(false);
+        window.location.reload();
+      }, 1500);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to clear conversations");
+    }
   };
 
   return (

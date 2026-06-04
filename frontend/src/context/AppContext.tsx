@@ -36,23 +36,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Restaurar sesión al montar
   useEffect(() => {
-    const restoreSession = () => {
+    const restoreSession = async () => {
       setIsLoading(true);
+
       try {
         const token = authLib.getToken();
+
         if (token) {
-           // Sólo sabemos que existe token
-         // El usuario real se restaurará después
+          const user = await authLib.getCurrentUser();
+
+          if (user) {
+            setUser(user);
+          } else {
+            authLib.logout();
+            setUser(null);
+          }
         } else {
-          // Sin token, limpiar usuario
           setUser(null);
-          
-          // Redirigir a login si está en ruta protegida
-          const isAuthPage = pathname?.includes("/login") || pathname?.includes("/register");
+
+          const isAuthPage =
+            pathname?.includes("/login") ||
+            pathname?.includes("/register");
+
           if (!isAuthPage && pathname !== "/") {
             router.push("/login");
           }
         }
+      } catch (err) {
+        console.error("Error restoring session:", err);
+        authLib.logout();
+        setUser(null);
       } finally {
         setIsLoading(false);
       }

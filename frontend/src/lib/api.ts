@@ -129,3 +129,16 @@ export async function saveSettings(settings: {
   });
   return handleResponse(res, "Failed to save settings");
 }
+
+export async function clearAllConversations() {
+  const res = await fetch(`${BACKEND}/conversations/`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to clear conversations");
+  }
+
+  return res.json();
+}

@@ -45,3 +45,28 @@ export function getToken() {
 export function isAuthenticated() {
   return !!localStorage.getItem("token");
 }
+
+export async function getCurrentUser() {
+  const token = getToken();
+
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const res = await fetch(`${BACKEND}/auth/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      logout();
+      return null;
+    }
+
+    return await res.json();
+  } catch {
+    return null;
+  }
+}

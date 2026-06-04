@@ -17,6 +17,7 @@ export type Conversation = {
   messages: Message[];
   created_at: string;
   updated_at: string;
+  pinned?: boolean;
 };
 
 // ===== LLM =====

@@ -1,21 +1,33 @@
 "use client";
 
-import { useEffect, ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import * as authLib from "@/lib/auth";
+import { useApp } from "@/context/AppContext";
 
-export function ProtectedRoute({ children }: { children: ReactNode }) {
+export function ProtectedRoute({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const router = useRouter();
-  const isAuthenticated = authLib.isAuthenticated();
+  const { user, isLoading } = useApp();
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isLoading && !user) {
       router.push("/login");
     }
-  }, [isAuthenticated, router]);
+  }, [user, isLoading, router]);
 
-  if (!isAuthenticated) {
-    return null; // O un loading spinner
+  if (isLoading) {
+    return (
+      <div className="h-screen bg-gray-950 flex items-center justify-center text-white">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
   }
 
   return <>{children}</>;
