@@ -1,7 +1,7 @@
-type Props = {
-  isLocalLLM: boolean;
-  currentView: string;
-};
+"use client";
+
+import { useApp } from "@/context/AppContext";
+import { usePathname } from "next/navigation";
 
 const viewLabels: Record<string, string> = {
   chat: "Chat with your Security Agent",
@@ -10,7 +10,23 @@ const viewLabels: Record<string, string> = {
   documents: "Security Documents",
 };
 
-export default function StatusBar({ isLocalLLM, currentView }: Props) {
+export default function StatusBar() {
+  const { provider } = useApp();
+  const pathname = usePathname() ?? "";
+
+  const isLocalLLM = provider === "local";
+
+  let currentView = "chat";
+  if (pathname.includes("camera")) {
+    currentView = "camera";
+  } else if (pathname.includes("alerts")) {
+    currentView = "alerts";
+  } else if (pathname.includes("documents")) {
+    currentView = "documents";
+  } else if (pathname.includes("settings")) {
+    currentView = "settings";
+  }
+
   return (
     <header className="bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between">
       <h2 className="text-lg font-semibold text-white">

@@ -15,6 +15,16 @@ async def setup_database_indexes(db: AsyncIOMotorDatabase):
     
     # Conversations collection - index on id for faster lookups
     await db["conversations"].create_index("id", unique=False)
+
+    # Security events - compound index for user queries
+    await db["security_events"].create_index([("user_email", 1), ("timestamp", -1)])
+    await db["security_events"].create_index([("user_email", 1), ("severity", 1)])
+    await db["security_events"].create_index([("user_email", 1), ("zone_id", 1)])
+    await db["security_events"].create_index([("user_email", 1), ("event_type", 1)])
+    await db["security_events"].create_index("id", unique=True)
+
+    # Zones
+    await db["zones"].create_index("id", unique=True)
     
     print("✓ Database indexes created successfully")
 

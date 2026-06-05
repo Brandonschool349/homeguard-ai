@@ -1,9 +1,10 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { LLMProvider, User, Alert } from "@/types";
 import * as authLib from "@/lib/auth";
+import { setUnauthorizedCallback } from "@/lib/api";
 
 type AppContextType = {
   // LLM
@@ -32,9 +33,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const pathname = usePathname();
 
-  // Restaurar sesión al montar
+  // Escuchar eventos de desautorización desde el API Helper
+  useEffect(() => {
+    setUnauthorizedCallback(() => {
+      authLib.logout();
+      setUser(null);
+      
+      if (typeof window !== "undefined") {
+        const path = window.location.pathname;
+        const isAuthPage = path.includes("/login") || path.includes("/register");
+        if (!isAuthPage) {
+          router.push("/login");
+        }
+      }
+    });
+
+    return () => {
+      setUnauthorizedCallback(null);
+    };
+  }, [router]);
+
+  // Restaurar sesión una única vez al montar la aplicación
   useEffect(() => {
     const restoreSession = async () => {
       setIsLoading(true);
@@ -53,14 +73,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           }
         } else {
           setUser(null);
-
-          const isAuthPage =
-            pathname?.includes("/login") ||
-            pathname?.includes("/register");
-
-          if (!isAuthPage && pathname !== "/") {
-            router.push("/login");
-          }
         }
       } catch (err) {
         console.error("Error restoring session:", err);
@@ -72,7 +84,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
 
     restoreSession();
-  }, [router, pathname]);
+  }, []);
 
   const addAlert = useCallback((alert: Alert) => {
     setAlerts((prev) => [alert, ...prev]);

@@ -9,6 +9,8 @@ from app.api.routes.auth import router as auth_router
 from app.core.config import settings
 from app.core.db_init import setup_database_indexes
 from app.core.database import client, db
+from app.api.routes.events import router as events_router
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -49,3 +51,4 @@ app.include_router(health_router)
 app.include_router(conversations_router)
 app.include_router(settings_router)
 app.include_router(auth_router)
+app.include_router(events_router)

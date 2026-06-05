@@ -9,30 +9,8 @@ import type { User } from "@/types";
 export function useAuth() {
   const router = useRouter();
   const { user, setUser } = useApp();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Restaurar sesión al montar componente
-  useEffect(() => {
-    const restoreSession = async () => {
-      setLoading(true);
-      try {
-        const token = authLib.getToken();
-        if (token) {
-          // Token existe, pero no tenemos info del usuario desde el backend
-          // Por ahora, marcamos como autenticado
-          // En producción, validarías el token en el backend
-        }
-      } catch (err) {
-        console.error("Error restoring session:", err);
-        authLib.logout();
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    restoreSession();
-  }, [setUser]);
 
   const register = useCallback(
     async (email: string, password: string) => {

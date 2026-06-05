@@ -1,4 +1,5 @@
 "use client";
+import { getToken } from "@/lib/auth";
 
 import {
   createContext,
@@ -57,6 +58,12 @@ export function ConversationProvider({
   }, []);
 
   useEffect(() => {
+    const token = getToken();
+
+    if (!token) {
+      return;
+    }
+
     load();
   }, [load]);
 
